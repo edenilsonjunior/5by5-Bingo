@@ -404,29 +404,63 @@ void PrintCardWinner(int[,] matrix, string title, int winner)
 }
 
 /*
- * Sort names and points from winners
+ * Sort names and points from winners and prints on console
  */
-void SortWinners()
+void PrintScoreBoard()
 {
+    string[] names = new string[playerAmount];
+    int[] points = new int[playerAmount];
+
+    // Making a copy to dont change original arrays
+    for (int i = 0; i < playerAmount; i++)
+    {
+        names[i] = playersNames[i];
+        points[i] = playersPoints[i];
+    }
+
 
     for (int i = 0; i < playerAmount; i++)
     {
         for (int j = i + 1; j < playerAmount; j++)
         {
-            if (playersPoints[i] < playersPoints[j])
+            if (points[i] < points[j])
             {
-                int tempPoints = playersPoints[i];
-                playersPoints[i] = playersPoints[j];
-                playersPoints[j] = tempPoints;
+                int tempPoints = points[i];
+                points[i] = points[j];
+                points[j] = tempPoints;
 
-                string tempNames = playersNames[i];
-                playersNames[i] = playersNames[j];
-                playersNames[j] = tempNames;
+                string tempNames = names[i];
+                names[i] = names[j];
+                names[j] = tempNames;
 
             }
         }
     }
+
+    Console.WriteLine("\n--------ScoreBoard:--------");
+    for (int i = 0; i < playerAmount; i++)
+    {
+        int p = points[i];
+
+
+
+        string s = names[i];
+        Console.WriteLine($"{s}: {p}");
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  * Prints every sorted numbers
@@ -499,22 +533,16 @@ while (!gameOver)
 
 if (gameOver)
 {
+
+
     Console.Clear();
     PrintLogo();
-
-    // Sort winners names by points
-    SortWinners();
 
     Console.WriteLine("\n--------All bingos:--------");
     PrintWinners();
 
-    Console.WriteLine("\n--------ScoreBoard:--------");
-    for (int i = 0; i < playerAmount; i++)
-    {
-        int p = playersPoints[i];
-        string s = playersNames[i];
-        Console.WriteLine($"{s}: {p}");
-    }
+    PrintScoreBoard();
+
 
     Console.Write("Press any key to continue...");
     Console.ReadKey();
