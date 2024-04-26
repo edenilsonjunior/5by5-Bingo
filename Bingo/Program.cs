@@ -1,28 +1,94 @@
 ﻿
+// Amount of players in game
+int playerAmount = ReadInt("Enter the amount of players:");
+
+
+// How many cards each player has
+int cardsPerPlayer = ReadInt("Enter how many cards per player:");
+
+
+/*
+ * Represents every card in game
+ * Lines: Represents each player 
+ * Columns: Represents each card game
+ */
+int[,][,] cards = new int[playerAmount, cardsPerPlayer][,];
+
+
+/*
+ * playersNames: array that contains each name from players
+ * playersPoints: array that keeps players points
+ */
+string[] playersNames = new string[playerAmount];
+int[] playersPoints = new int[playerAmount];
+
+
+/*
+ * Array for already sorted numbers and his index
+ */
+int[] sortedNumbers = new int[99];
+int indexSortedNumbers = 0;
+
+
+// Variables that keeps the status of each victory
+bool hasBingoVertically = false;
+int winnerVertically = -1;
+int[,] cardWinnerVertically = null;
+
+bool hasBingoHorizontally = false;
+int winnerHorizontally = -1;
+int[,] cardWinnerHorizontally = null;
+
+bool hasTotallyBingo = false;
+int winnerTotally = -1;
+int[,] cardWinnerTotally = null;
+
+
+// main loop stop condition
+bool gameOver = false;
+
+
+for (int i = 0; i < playerAmount; i++)
+{
+    Console.Write($"Enter {i} player name: ");
+    playersNames[i] = Console.ReadLine();
+}
 
 
 /*-----Functions-----*/
+
 /*
- * Function that returns a new matrix with sorted numbers
+ * Read a int from default input and returns it
+ */
+int ReadInt(string title)
+{
+    int result;
+    Console.WriteLine(title);
+    Console.Write("R: ");
+    do
+    {
+        result = int.Parse(Console.ReadLine());
+    } while (result <= 0);
+
+    return result;
+}
+
+/*
+ * Function that returns a new matrix 5x5 with sorted numbers
  * between 1-99 that are not repeated
  */
-int[,] SortMatrix()
+int[,] CreateCard()
 {
     int[,] matrix = new int[5, 5];
     int number;
-
-    Random random = new Random();
 
     for (int line = 0; line < 5; line++)
     {
         for (int column = 0; column < 5; column++)
         {
-            /*
-             * Executes do-while loop while the random number is already in matrix
-             */
             do
             {
-                number = random.Next(1, 100);
+                number = new Random().Next(1, 100);
 
             } while (IsRepeated(matrix, number));
 
@@ -57,33 +123,23 @@ bool IsRepeated(int[,] matrix, int number)
 }
 
 /*
- * Sort and matrix for every card([][]) in the array
+ * Instantiate a new matriz for every card in game
  */
-void PopulateCards(int[][,] cards, int cardsSize)
+void PopulateCards()
 {
-    for (int i = 0; i < cardsSize; i++)
+    for (int player = 0; player < playerAmount; player++)
     {
-        cards[i] = SortMatrix();
+        for (int card = 0; card < cardsPerPlayer; card++)
+        {
+            cards[player, card] = CreateCard();
+        }
     }
 }
 
 /*
- * Prints que matrix in the Console
+ * Method to check if is bingo in a column
  */
-void PrintMatrix(int[,] matrix, int lines, int columns, string title)
-{
-    Console.WriteLine(title);
-    for (int l = 0; l < lines; l++)
-    {
-        for (int c = 0; c < columns; c++)
-        {
-            Console.Write($"{matrix[l, c]:00} ");
-        }
-        Console.WriteLine();
-    }
-}
-
-bool IsBingoVertically(int[,] cards)
+bool IsBingoVertically(int[,] card)
 {
     bool bingo = false;
 
@@ -92,7 +148,7 @@ bool IsBingoVertically(int[,] cards)
         int count = 0;
         for (int c = 0; c < 5; c++)
         {
-            if (cards[c, l] < 0)
+            if (card[c, l] < 0)
                 count++;
         }
 
@@ -106,10 +162,10 @@ bool IsBingoVertically(int[,] cards)
     return bingo;
 }
 
-
-
-
-bool IsBingoHorizontally(int[,] cards)
+/*
+ * Method to check if is bingo in a line
+ */
+bool IsBingoHorizontally(int[,] card)
 {
     bool bingo = false;
 
@@ -118,7 +174,7 @@ bool IsBingoHorizontally(int[,] cards)
         int count = 0;
         for (int c = 0; c < 5; c++)
         {
-            if (cards[l, c] < 0)
+            if (card[l, c] < 0)
                 count++;
         }
         if (count == 5)
@@ -131,7 +187,10 @@ bool IsBingoHorizontally(int[,] cards)
     return bingo;
 }
 
-bool IsTotallyBingo(int[,] cards)
+/*
+ * Method to check if is bingo in a entire card
+ */
+bool IsTotallyBingo(int[,] card)
 {
     bool bingo = false;
     int count = 0;
@@ -140,7 +199,7 @@ bool IsTotallyBingo(int[,] cards)
     {
         for (int c = 0; c < 5; c++)
         {
-            if (cards[c, l] < 0)
+            if (card[c, l] < 0)
                 count++;
         }
     }
@@ -150,65 +209,292 @@ bool IsTotallyBingo(int[,] cards)
     return bingo;
 }
 
-
-// Amount of players
-const int playerAmount = 3;
-
 /*
- * Array that represents players names
- * Array size = amount of players
- * Each index of array = represents the name of player
+ * Negate the number of all tables that have a corresponding match
  */
-string[] playersNames = new string[playerAmount];
-
-
-/*
- * Array that represents players cards
- * Array size = amount of players
- * Each index of array = represents how many cards each player has
- */
-int[] playersCards = new int[playerAmount] { 1, 2, 3 };
-
-
-/* Array that represents players points
- * Array size = amount of players
- * Each index of array = represens how many points each player has
- */
-int[] playersPoints = new int[playerAmount];
-
-
-// Represents how many cards there are
-int cardsSize = 0;
-
-for (int i = 0; i < playersCards.Length; i++)
+void CheckCards(int number)
 {
-    cardsSize += playersCards[i];
+    for (int player = 0; player < playerAmount; player++)
+    {
+        for (int card = 0; card < cardsPerPlayer; card++)
+        {
+            for (int line = 0; line < 5; line++)
+            {
+                for (int column = 0; column < 5; column++)
+                {
+                    if (cards[player, card][line, column] == number)
+                    {
+                        cards[player, card][line, column] = number * -1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/*
+ * Every round this function is claimed
+ * Sorts an number and check for bingos
+ */
+void Round()
+{
+    int number = SortNumber();
+
+    sortedNumbers[indexSortedNumbers++] = number;
+
+    CheckCards(number);
+
+    // Check for Horizontally winners
+    if (!hasBingoHorizontally)
+    {
+        for (int player = 0; player < playerAmount && !hasBingoHorizontally; player++)
+        {
+            for (int card = 0; card < cardsPerPlayer && !hasBingoHorizontally; card++)
+            {
+                if (IsBingoHorizontally(cards[player, card]))
+                {
+                    hasBingoHorizontally = true;
+                    winnerHorizontally = player;
+                    cardWinnerHorizontally = cards[player, card];
+                    playersPoints[player] += 1;
+                }
+            }
+        }
+    }
+
+    // Check for Vertically winners
+    if (!hasBingoVertically)
+    {
+        for (int player = 0; player < playerAmount && !hasBingoVertically; player++)
+        {
+            for (int card = 0; card < cardsPerPlayer && !hasBingoVertically; card++)
+            {
+                if (IsBingoVertically(cards[player, card]))
+                {
+                    hasBingoVertically = true;
+                    winnerVertically = player;
+                    cardWinnerVertically = cards[player, card];
+                    playersPoints[player] += 1;
+                }
+            }
+        }
+    }
+
+    // Check for Entire card winners
+    if (!hasTotallyBingo)
+    {
+        for (int player = 0; player < playerAmount && !hasTotallyBingo; player++)
+        {
+            for (int card = 0; card < cardsPerPlayer && !hasTotallyBingo; card++)
+            {
+                if (IsTotallyBingo(cards[player, card]))
+                {
+                    hasTotallyBingo = true;
+                    winnerTotally = player;
+                    cardWinnerTotally = cards[player, card];
+                    playersPoints[player] += 5;
+                    gameOver = true;
+                }
+            }
+        }
+    }
+
+}
+
+/*
+ * Sort a number between 1 and 99 without repeating
+ */
+int SortNumber()
+{
+    int number;
+    bool contains;
+
+    do
+    {
+        contains = false;
+        number = new Random().Next(1, 100);
+
+        for (int i = 0; i < sortedNumbers.Length; i++)
+        {
+            if (sortedNumbers[i] == number)
+            {
+                contains = true;
+            }
+        }
+
+    } while (contains);
+
+    return number;
+}
+
+/*
+ * Print all cards from a player
+ */
+void PrintCardByPlayer(int player)
+{
+
+    for (int line = 0; line < 5; line++)
+    {
+        for (int cardIndex = 0; cardIndex < cardsPerPlayer; cardIndex++)
+        {
+            for (int column = 0; column < 5; column++)
+            {
+                if (column == 0)
+                {
+                    Console.Write("| ");
+                }
+
+                if (cards[player, cardIndex][line, column] > 0)
+                {
+                    Console.Write($"{cards[player, cardIndex][line, column]:00} ");
+
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.BackgroundColor = ConsoleColor.White;
+                    int num = cards[player, cardIndex][line, column] * -1;
+                    Console.Write($"{num:00}");
+                    Console.ResetColor();
+                    Console.Write(" ");
+                }
+
+                if (column == 4)
+                {
+                    Console.Write("| ");
+                }
+
+            }
+
+        }
+        Console.WriteLine();
+    }
+
+}
+
+/*
+ * Print the corresponding cards
+ */
+void PrintCardWinner(int[,] matrix, string title, int winner)
+{
+    Console.WriteLine(title);
+    Console.WriteLine($"Winner: {playersNames[winner]}");
+    for (int l = 0; l < 5; l++)
+    {
+        for (int c = 0; c < 5; c++)
+        {
+            if (matrix[l, c] > 0)
+            {
+                Console.Write($"{matrix[l, c]:00} ");
+
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.BackgroundColor = ConsoleColor.White;
+                int num = matrix[l, c] * -1;
+                Console.Write($"{num:00}");
+                Console.ResetColor();
+                Console.Write(" ");
+            }
+        }
+        Console.WriteLine();
+    }
+    Console.WriteLine("======================================");
+}
+
+/*
+ * Sort names and points from winners
+ */
+void SortWinners(){
+
+    for (int i = 0; i < playerAmount; i++)
+    {
+        for (int j = i + 1; j < playerAmount; j++)
+        {
+            if (playersPoints[i] < playersPoints[j])
+            {
+                int tempPoints = playersPoints[i];
+                playersPoints[i] = playersPoints[j];
+                playersPoints[j] = tempPoints;
+
+                string tempNames = playersNames[i];
+                playersNames[i] = playersNames[j];
+                playersNames[j] = tempNames;
+
+            }
+        }
+    }
+}
+
+/*
+ * Prints every sorted numbers
+ */
+void PrintSortedNumbers()
+{
+    if (indexSortedNumbers > 0)
+    {
+        Console.Write("\n\nSorted numbers: ");
+        for (int i = 0; i < indexSortedNumbers; i++)
+        {
+            Console.Write($"{sortedNumbers[i]}-");
+        }
+    }
+    Console.WriteLine("\n======================================");
+
 }
 
 
-/*
- * Each player can have multiple cards, the control is made by var count
- */
-int[][,] cards = new int[cardsSize][,];
+/*-----Main game-----*/
+PopulateCards();
 
-
-/*
-PopulateCards(cards, cardsSize);
-
-for (int i = 0; i < cardsSize; i++)
+while (!gameOver)
 {
-    PrintMatrix(cards[0], 5, 5, $"Matrix {i + 1}");
-    Console.WriteLine("\n");
-}*/
+    Thread.Sleep(100);
 
+    Console.Clear();
+    Console.WriteLine(".______    __  .__   __.   _______   ______    __  \r\n|   _  \\  |  | |  \\ |  |  /  _____| /  __  \\  |  | \r\n|  |_)  | |  | |   \\|  | |  |  __  |  |  |  | |  | \r\n|   _  <  |  | |  . `  | |  | |_ | |  |  |  | |  | \r\n|  |_)  | |  | |  |\\   | |  |__| | |  `--'  | |__| \r\n|______/  |__| |__| \\__|  \\______|  \\______/  (__) \r\n                                                   ");
 
-int[,] bingo = { { -1, -2, -3, -4, -5 },
-                 { -1, -2, -3, -4, -5 },
-                 { -1, -2, -3, -4, -5 },
-                 { -1, -2, -3, -4, -5 },
-                 { -1, -2, -3, -4, -5 }
-               };
+    PrintSortedNumbers();
 
-Console.WriteLine($"bingo horizontal: {IsBingoHorizontally(bingo)}");
-Console.WriteLine($"bingo vertical: {IsBingoVertically(bingo)}");
-Console.WriteLine($"bingo total: {IsTotallyBingo(bingo)}");
+    if (hasBingoHorizontally)
+        PrintCardWinner(cardWinnerHorizontally, "Card winner in horizontally:", winnerHorizontally);
+
+    if (hasBingoVertically)
+        PrintCardWinner(cardWinnerVertically, "Card winner in vertically:", winnerVertically);
+
+    if (hasTotallyBingo)
+        PrintCardWinner(cardWinnerTotally, "Card winner in totally:", winnerTotally);
+
+    for (int player = 0; player < playerAmount; player++)
+    {
+        Console.WriteLine($"{playersNames[player]}: ");
+        PrintCardByPlayer(player);
+
+        Console.WriteLine("======================================");
+    }
+
+    Round();
+}
+
+Console.Clear();
+Console.WriteLine(".______    __  .__   __.   _______   ______    __  \r\n|   _  \\  |  | |  \\ |  |  /  _____| /  __  \\  |  | \r\n|  |_)  | |  | |   \\|  | |  |  __  |  |  |  | |  | \r\n|   _  <  |  | |  . `  | |  | |_ | |  |  |  | |  | \r\n|  |_)  | |  | |  |\\   | |  |__| | |  `--'  | |__| \r\n|______/  |__| |__| \\__|  \\______|  \\______/  (__) \r\n                                                   ");
+
+Console.WriteLine("\n--------All bingos:--------");
+
+PrintCardWinner(cardWinnerHorizontally, "Card winner in horizontally:", winnerHorizontally);
+PrintCardWinner(cardWinnerVertically, "Card winner in vertically:", winnerVertically);
+PrintCardWinner(cardWinnerTotally, "Card winner in totally:", winnerTotally);
+
+Console.WriteLine("\n--------ScoreBoard:--------");
+
+SortWinners();
+for (int i = 0; i < playerAmount; i++)
+{
+    int p = playersPoints[i];
+    string s = playersNames[i];
+    Console.WriteLine($"{s}: {p}");
+}
+
+Console.Write("Press any key to continue...");
+Console.ReadKey();
