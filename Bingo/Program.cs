@@ -406,7 +406,8 @@ void PrintCardWinner(int[,] matrix, string title, int winner)
 /*
  * Sort names and points from winners
  */
-void SortWinners(){
+void SortWinners()
+{
 
     for (int i = 0; i < playerAmount; i++)
     {
@@ -444,19 +445,11 @@ void PrintSortedNumbers()
 
 }
 
-
-/*-----Main game-----*/
-PopulateCards();
-
-while (!gameOver)
+/*
+ * // print winners
+ */
+void PrintWinners()
 {
-    Thread.Sleep(100);
-
-    Console.Clear();
-    Console.WriteLine(".______    __  .__   __.   _______   ______    __  \r\n|   _  \\  |  | |  \\ |  |  /  _____| /  __  \\  |  | \r\n|  |_)  | |  | |   \\|  | |  |  __  |  |  |  | |  | \r\n|   _  <  |  | |  . `  | |  | |_ | |  |  |  | |  | \r\n|  |_)  | |  | |  |\\   | |  |__| | |  `--'  | |__| \r\n|______/  |__| |__| \\__|  \\______|  \\______/  (__) \r\n                                                   ");
-
-    PrintSortedNumbers();
-
     if (hasBingoHorizontally)
         PrintCardWinner(cardWinnerHorizontally, "Card winner in horizontally:", winnerHorizontally);
 
@@ -465,7 +458,33 @@ while (!gameOver)
 
     if (hasTotallyBingo)
         PrintCardWinner(cardWinnerTotally, "Card winner in totally:", winnerTotally);
+}
 
+/*
+ * Prints logo in console
+ */
+void PrintLogo()
+{
+    Console.WriteLine(".______    __  .__   __.   _______   ______    __  \r\n|   _  \\  |  | |  \\ |  |  /  _____| /  __  \\  |  | \r\n|  |_)  | |  | |   \\|  | |  |  __  |  |  |  | |  | \r\n|   _  <  |  | |  . `  | |  | |_ | |  |  |  | |  | \r\n|  |_)  | |  | |  |\\   | |  |__| | |  `--'  | |__| \r\n|______/  |__| |__| \\__|  \\______|  \\______/  (__) \r\n                                                   ");
+}
+
+
+/*-----Main game-----*/
+PopulateCards();
+
+while (!gameOver)
+{
+    // Clear and prints logo in console
+    Console.Clear();
+    PrintLogo();
+
+    // print already sorted numbers
+    PrintSortedNumbers();
+
+    // print winners
+    PrintWinners();
+
+    // Print every card from each player
     for (int player = 0; player < playerAmount; player++)
     {
         Console.WriteLine($"{playersNames[player]}: ");
@@ -474,27 +493,29 @@ while (!gameOver)
         Console.WriteLine("======================================");
     }
 
+    Console.ReadKey();
     Round();
 }
 
-Console.Clear();
-Console.WriteLine(".______    __  .__   __.   _______   ______    __  \r\n|   _  \\  |  | |  \\ |  |  /  _____| /  __  \\  |  | \r\n|  |_)  | |  | |   \\|  | |  |  __  |  |  |  | |  | \r\n|   _  <  |  | |  . `  | |  | |_ | |  |  |  | |  | \r\n|  |_)  | |  | |  |\\   | |  |__| | |  `--'  | |__| \r\n|______/  |__| |__| \\__|  \\______|  \\______/  (__) \r\n                                                   ");
-
-Console.WriteLine("\n--------All bingos:--------");
-
-PrintCardWinner(cardWinnerHorizontally, "Card winner in horizontally:", winnerHorizontally);
-PrintCardWinner(cardWinnerVertically, "Card winner in vertically:", winnerVertically);
-PrintCardWinner(cardWinnerTotally, "Card winner in totally:", winnerTotally);
-
-Console.WriteLine("\n--------ScoreBoard:--------");
-
-SortWinners();
-for (int i = 0; i < playerAmount; i++)
+if (gameOver)
 {
-    int p = playersPoints[i];
-    string s = playersNames[i];
-    Console.WriteLine($"{s}: {p}");
-}
+    Console.Clear();
+    PrintLogo();
 
-Console.Write("Press any key to continue...");
-Console.ReadKey();
+    // Sort winners names by points
+    SortWinners();
+
+    Console.WriteLine("\n--------All bingos:--------");
+    PrintWinners();
+
+    Console.WriteLine("\n--------ScoreBoard:--------");
+    for (int i = 0; i < playerAmount; i++)
+    {
+        int p = playersPoints[i];
+        string s = playersNames[i];
+        Console.WriteLine($"{s}: {p}");
+    }
+
+    Console.Write("Press any key to continue...");
+    Console.ReadKey();
+}
