@@ -451,17 +451,6 @@ void PrintScoreBoard()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 /*
  * Prints every sorted numbers
  */
