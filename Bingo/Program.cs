@@ -1,11 +1,8 @@
-﻿
-// Amount of players in game
-int playerAmount = ReadInt("Enter the amount of players:");
-
+﻿// Amount of players in game
+int playerAmount = ReadInt("Enter the amount of players:", 2);
 
 // How many cards each player has
-int cardsPerPlayer = ReadInt("Enter how many cards per player:");
-
+int cardsPerPlayer = ReadInt("Enter how many cards per player:", 1);
 
 /*
  * Represents every card in game
@@ -14,7 +11,6 @@ int cardsPerPlayer = ReadInt("Enter how many cards per player:");
  */
 int[,][,] cards = new int[playerAmount, cardsPerPlayer][,];
 
-
 /*
  * playersNames: array that contains each name from players
  * playersPoints: array that keeps players points
@@ -22,13 +18,11 @@ int[,][,] cards = new int[playerAmount, cardsPerPlayer][,];
 string[] playersNames = new string[playerAmount];
 int[] playersPoints = new int[playerAmount];
 
-
 /*
  * Array for already sorted numbers and his index
  */
 int[] sortedNumbers = new int[99];
 int indexSortedNumbers = 0;
-
 
 // Variables that keeps the status of each victory
 bool hasBingoVertically = false;
@@ -43,32 +37,33 @@ bool hasTotallyBingo = false;
 int winnerTotally = -1;
 int[,] cardWinnerTotally = null;
 
-
 // main loop stop condition
 bool gameOver = false;
 
-
+// Read players names
 for (int i = 0; i < playerAmount; i++)
 {
-    Console.Write($"Enter {i} player name: ");
+    Console.Write($"Enter {i + 1} player name: ");
     playersNames[i] = Console.ReadLine();
 }
-
 
 /*-----Functions-----*/
 
 /*
  * Read a int from default input and returns it
+ * Parameters: 
+ * string title: title to be printed
+ * int minimum: minimum value that can be returned
  */
-int ReadInt(string title)
+int ReadInt(string title, int minimum)
 {
     int result;
-    Console.WriteLine(title);
-    Console.Write("R: ");
     do
     {
+        Console.WriteLine(title);
+        Console.Write("R: ");
         result = int.Parse(Console.ReadLine());
-    } while (result <= 0);
+    } while (result < minimum);
 
     return result;
 }
@@ -183,7 +178,6 @@ bool IsBingoHorizontally(int[,] card)
             break;
         }
     }
-
     return bingo;
 }
 
@@ -238,8 +232,8 @@ void CheckCards(int number)
  */
 void Round()
 {
+    // Sorts a number and check for bingos
     int number = SortNumber();
-
     sortedNumbers[indexSortedNumbers++] = number;
 
     CheckCards(number);
@@ -328,7 +322,7 @@ int SortNumber()
 }
 
 /*
- * Print all cards from a player
+ * Print all cards in a row for a specific player
  */
 void PrintCardByPlayer(int player)
 {
@@ -347,7 +341,6 @@ void PrintCardByPlayer(int player)
                 if (cards[player, cardIndex][line, column] > 0)
                 {
                     Console.Write($"{cards[player, cardIndex][line, column]:00} ");
-
                 }
                 else
                 {
@@ -363,13 +356,10 @@ void PrintCardByPlayer(int player)
                 {
                     Console.Write("| ");
                 }
-
             }
-
         }
         Console.WriteLine();
     }
-
 }
 
 /*
@@ -404,7 +394,7 @@ void PrintCardWinner(int[,] matrix, string title, int winner)
 }
 
 /*
- * Sort names and points from winners and prints on console
+ * Creates a secoundary array with the players points and names and sort it
  */
 void PrintScoreBoard()
 {
@@ -437,19 +427,15 @@ void PrintScoreBoard()
         }
     }
 
-    Console.WriteLine("\n--------ScoreBoard:--------");
+    Console.WriteLine("\n==============ScoreBoard==============");
     for (int i = 0; i < playerAmount; i++)
     {
-        int p = points[i];
+        int pPoint = points[i];
 
-
-
-        string s = names[i];
-        Console.WriteLine($"{s}: {p}");
+        string pName = names[i];
+        Console.WriteLine($"{pName}: {pPoint}");
     }
-
 }
-
 
 /*
  * Prints every sorted numbers
@@ -458,18 +444,20 @@ void PrintSortedNumbers()
 {
     if (indexSortedNumbers > 0)
     {
-        Console.Write("\n\nSorted numbers: ");
+        Console.Write($"\n\nSorted numbers({indexSortedNumbers}): ");
         for (int i = 0; i < indexSortedNumbers; i++)
         {
-            Console.Write($"{sortedNumbers[i]}-");
+            if(i == indexSortedNumbers - 1)
+                Console.Write($"{sortedNumbers[i]}");
+            else
+                Console.Write($"{sortedNumbers[i]}-");
         }
     }
     Console.WriteLine("\n======================================");
-
 }
 
 /*
- * // print winners
+ * Print winners if exists
  */
 void PrintWinners()
 {
@@ -491,47 +479,62 @@ void PrintLogo()
     Console.WriteLine(".______    __  .__   __.   _______   ______    __  \r\n|   _  \\  |  | |  \\ |  |  /  _____| /  __  \\  |  | \r\n|  |_)  | |  | |   \\|  | |  |  __  |  |  |  | |  | \r\n|   _  <  |  | |  . `  | |  | |_ | |  |  |  | |  | \r\n|  |_)  | |  | |  |\\   | |  |__| | |  `--'  | |__| \r\n|______/  |__| |__| \\__|  \\______|  \\______/  (__) \r\n                                                   ");
 }
 
-
-/*-----Main game-----*/
-PopulateCards();
-
-while (!gameOver)
+void PrintEveryoneCards()
 {
-    // Clear and prints logo in console
-    Console.Clear();
-    PrintLogo();
-
-    // print already sorted numbers
-    PrintSortedNumbers();
-
-    // print winners
-    PrintWinners();
-
     // Print every card from each player
     for (int player = 0; player < playerAmount; player++)
     {
         Console.WriteLine($"{playersNames[player]}: ");
         PrintCardByPlayer(player);
 
-        Console.WriteLine("======================================");
+        for (int i = 0; i < cardsPerPlayer; i++)
+        {
+            Console.Write("===================");
+        }
+        Console.WriteLine();
     }
+}
+
+
+
+
+/*-----Main game execution-----*/
+PopulateCards();
+
+/*
+ * Main loop that runs until the game is over
+ */
+while (!gameOver)
+{
+    // Clear console and print logo
+    Console.Clear();
+    PrintLogo();
+
+    // Print sorted numbers
+    PrintSortedNumbers();
+
+    // Print winners if exists
+    PrintWinners();
+
+    // Print score board
+    PrintEveryoneCards();
 
     Console.ReadKey();
     Round();
 }
 
+// Game over with all bingos and score board
 if (gameOver)
 {
-
-
     Console.Clear();
     PrintLogo();
 
-    Console.WriteLine("\n--------All bingos:--------");
+    PrintSortedNumbers();
+
+    Console.WriteLine("\n==============All bingos==============");
     PrintWinners();
 
     PrintScoreBoard();
-
 
     Console.Write("Press any key to continue...");
     Console.ReadKey();
